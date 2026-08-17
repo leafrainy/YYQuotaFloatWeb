@@ -1,0 +1,16 @@
+{
+  "headers": [
+    {
+      "source": "/downloads/%E9%A2%9D%E5%BA%A6.dmg",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
+    {
+      "source": "/downloads/额度.dmg",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
+    {
+      "source": "/latest.json",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    }
+  ]
+}

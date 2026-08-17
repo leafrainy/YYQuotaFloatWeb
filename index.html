@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>额度 — macOS 用量置顶卡片</title>
+  <meta name="description" content="桌面置顶，同时看 OpenCode、Codex、Cursor、TraeWork 还剩多少。">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="top">
+    <span class="mark">额度</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>桌面置顶，同时看 OpenCode / Codex / Cursor / TraeWork 还剩多少</h1>
+      <p class="lead">手填订阅到期日。只读本机已有登录态，不另做账号。</p>
+      <p class="actions">
+        <a class="btn" href="/downloads/额度.dmg">下载 macOS 安装包</a>
+      </p>
+      <p id="version" class="version">正在读取版本…</p>
+    </section>
+
+    <ul class="points">
+      <li>
+        <strong>四家额度一行看完</strong>
+        <span>OpenCode、Codex、Cursor、TraeWork 的当前剩余，菜单栏也能看。</span>
+      </li>
+      <li>
+        <strong>卡片置顶，不抢焦点</strong>
+        <span>窄条浮在桌面；不想占地方可以只留菜单栏「额度」。</span>
+      </li>
+      <li>
+        <strong>到期日手填，凭证不离家</strong>
+        <span>不爬账单、不写回各工具的登录文件，token 也不会进官网。</span>
+      </li>
+    </ul>
+
+    <section class="install">
+      <h2>安装</h2>
+      <p>需要 macOS 14 或更高。打开 DMG，把「额度」拖进 Applications。</p>
+      <p>当前是 ad-hoc 签名。第一次若被拦截：右键 App →「打开」。</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>额度是本机工具，下载无需 GitHub 登录。</p>
+  </footer>
+  <script src="/app.js"></script>
+</body>
+</html>

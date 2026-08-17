@@ -1,0 +1,78 @@
+:root {
+  color-scheme: dark;
+  --bg: #0e1014;
+  --fg: #f2f3f5;
+  --muted: #9aa3b2;
+  --line: #232833;
+  --accent: #e8eaed;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.top, main, footer {
+  width: min(640px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.top {
+  padding: 28px 0 8px;
+}
+
+.mark {
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+.hero { padding: 48px 0 32px; }
+h1 {
+  font-size: 1.65rem;
+  line-height: 1.35;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+.lead, .version, .install p, footer p, .points span {
+  color: var(--muted);
+}
+.actions { margin: 28px 0 12px; }
+.btn {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #111;
+  text-decoration: none;
+  font-weight: 600;
+}
+.version { font-size: 0.9rem; min-height: 1.4em; }
+
+.points {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 40px;
+  border-top: 1px solid var(--line);
+}
+.points li {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 4px;
+}
+.points strong { font-weight: 600; }
+
+.install h2 {
+  font-size: 1rem;
+  font-weight: 650;
+  margin: 0 0 8px;
+}
+
+footer {
+  padding: 40px 0 48px;
+  font-size: 0.9rem;
+}
