@@ -1,52 +1,598 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>额度 — macOS 用量置顶卡片</title>
-  <meta name="description" content="桌面置顶，同时看 OpenCode、Codex、Cursor、TraeWork 还剩多少。">
-  <link rel="stylesheet" href="/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="额度 — macOS 桌面置顶卡片，同时查看 OpenCode、Codex、Cursor、TraeWork 剩余额度与订阅到期日。">
+  <meta name="keywords" content="额度,QuotaFloat,OpenCode,Codex,Cursor,TraeWork,用量">
+  <title>额度 · macOS 用量置顶卡片</title>
+  <style>
+    :root {
+      --bg: #f9fafb;
+      --surface: #ffffff;
+      --text: #111827;
+      --text-muted: #6b7280;
+      --text-light: #9ca3af;
+      --border: #e5e7eb;
+      --accent: #111827;
+      --accent-hover: #1f2937;
+      --green: #16a34a;
+      --radius: 16px;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      padding: 8px 18px;
+      background: var(--accent);
+      color: #fff !important;
+      border-radius: 10px;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+
+    .nav-cta:hover { background: var(--accent-hover); }
+
+    .hero {
+      padding: 88px 0 72px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    .hero-badge-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 span {
+      display: block;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-top: 12px;
+      letter-spacing: 0;
+    }
+
+    .hero-desc {
+      max-width: 560px;
+      margin: 0 auto 40px;
+      font-size: 1.05rem;
+      color: var(--text-muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 56px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
+      font-family: inherit;
+    }
+
+    .btn:active { transform: scale(0.98); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(17, 24, 39, 0.25);
+    }
+
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: #f3f4f6;
+      border-color: #d1d5db;
+    }
+
+    .btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+      padding-top: 8px;
+    }
+
+    .stat { text-align: center; }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .section { padding: 72px 0; }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .section-header h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .section-header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .feature-card:hover {
+      box-shadow: var(--shadow);
+      transform: translateY(-2px);
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      background: #f3f4f6;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 1.25rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+    }
+
+    .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      text-align: center;
+    }
+
+    .step-num {
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+      margin: 0 auto 16px;
+    }
+
+    .step h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .download-section {
+      background: var(--accent);
+      color: #fff;
+      border-radius: 24px;
+      padding: 56px 40px;
+      text-align: center;
+      margin: 0 0 72px;
+    }
+
+    .download-section h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .download-section > p {
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 32px;
+      font-size: 0.95rem;
+    }
+
+    .download-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .download-section .btn-primary {
+      background: #fff;
+      color: var(--accent);
+      box-shadow: none;
+    }
+
+    .download-section .btn-primary:hover { background: #f3f4f6; }
+
+    .download-note {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .compare {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 48px;
+    }
+
+    .compare-item {
+      text-align: center;
+      padding: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .compare-item strong {
+      display: block;
+      font-size: 1.25rem;
+      margin-bottom: 4px;
+    }
+
+    .compare-item span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.85rem;
+    }
+
+    footer p + p { margin-top: 6px; }
+
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .hero { padding: 56px 0 48px; }
+      .download-section { padding: 40px 24px; border-radius: 16px; }
+      .hero-stats { gap: 24px; }
+    }
+  </style>
 </head>
 <body>
-  <header class="top">
-    <span class="mark">额度</span>
-  </header>
 
-  <main>
-    <section class="hero">
-      <h1>桌面置顶，同时看 OpenCode / Codex / Cursor / TraeWork 还剩多少</h1>
-      <p class="lead">手填订阅到期日。只读本机已有登录态，不另做账号。</p>
-      <p class="actions">
-        <a class="btn" href="/downloads/额度.dmg">下载 macOS 安装包</a>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon">额</div>
+        额度
+      </a>
+      <div class="nav-links">
+        <a href="#features">特点</a>
+        <a href="#how">使用方法</a>
+        <a href="#download">下载</a>
+        <a href="#download" class="nav-cta">立即下载</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        macOS · 置顶卡片 · 只读登录态 · <span id="version-badge">加载中…</span>
+      </div>
+      <h1>
+        额度
+        <span>QuotaFloat — 一眼看到四家还剩多少</span>
+      </h1>
+      <p class="hero-desc">
+        桌面始终置顶的窄条卡片，同时显示 OpenCode、Codex、Cursor、TraeWork 的当前剩余，以及手填的订阅到期日。不另做账号，不爬账单。
       </p>
-      <p id="version" class="version">正在读取版本…</p>
-    </section>
+      <div class="hero-actions">
+        <a href="/downloads/额度.dmg" class="btn btn-primary" data-dl="mac">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          macOS 下载
+        </a>
+        <a href="#features" class="btn btn-secondary">了解特点</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-value">4</div>
+          <div class="stat-label">家额度同时看</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">0</div>
+          <div class="stat-label">套额外账号</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">14+</div>
+          <div class="stat-label">macOS 版本</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <ul class="points">
-      <li>
-        <strong>四家额度一行看完</strong>
-        <span>OpenCode、Codex、Cursor、TraeWork 的当前剩余，菜单栏也能看。</span>
-      </li>
-      <li>
-        <strong>卡片置顶，不抢焦点</strong>
-        <span>窄条浮在桌面；不想占地方可以只留菜单栏「额度」。</span>
-      </li>
-      <li>
-        <strong>到期日手填，凭证不离家</strong>
-        <span>不爬账单、不写回各工具的登录文件，token 也不会进官网。</span>
-      </li>
-    </ul>
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <h2>为什么用额度</h2>
+        <p>只回答两件事：现在还能用多少；快到期时额度还剩多少</p>
+      </div>
+      <div class="features">
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>四家一行看完</h3>
+          <p>OpenCode、Codex、Cursor、TraeWork 的当前剩余同时显示。菜单栏点「额度」也能看同一套数据。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📌</div>
+          <h3>置顶不抢焦点</h3>
+          <p>窄条浮在桌面，不抢键盘。不想占地方可以关掉桌面卡片，只留菜单栏。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📅</div>
+          <h3>到期日手填</h3>
+          <p>点卡片上的到期文案即可填写。不爬 Stripe / ChatGPT 账单，日期完全由你掌控。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>凭证不离家</h3>
+          <p>只读本机已有登录态，不写回 auth.json / Cursor 数据库 / Trae 登录文件。Token 不会进官网。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>快用完会变色</h3>
+          <p>剩余低于 20% 橙色、低于 10% 红色；到期不足 10 天同样提醒，没有通知打扰。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🖥️</div>
+          <h3>原生 macOS</h3>
+          <p>SwiftUI + AppKit 置顶面板，约 45 秒轮询。某家失败只灰那一行，不影响其余。</p>
+        </div>
+      </div>
 
-    <section class="install">
-      <h2>安装</h2>
-      <p>需要 macOS 14 或更高。打开 DMG，把「额度」拖进 Applications。</p>
-      <p>当前是 ad-hoc 签名。第一次若被拦截：右键 App →「打开」。</p>
-    </section>
-  </main>
+      <div class="compare">
+        <div class="compare-item">
+          <strong>OpenCode</strong>
+          <span>5h / 周 / 月剩余 %</span>
+        </div>
+        <div class="compare-item">
+          <strong>Codex</strong>
+          <span>5h / 周 / credits</span>
+        </div>
+        <div class="compare-item">
+          <strong>Cursor</strong>
+          <span>Auto / API · 无周额度</span>
+        </div>
+        <div class="compare-item">
+          <strong>TraeWork</strong>
+          <span>通用积分 + Work 专属</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="how" style="padding-top: 0;">
+    <div class="container">
+      <div class="section-header">
+        <h2>三步开始用</h2>
+        <p>本机已经登录的工具，打开就能看到剩余</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>安装额度</h3>
+          <p>下载 DMG，把「额度」拖进 Applications。若被拦截：右键 App →「打开」。</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>保持原工具登录</h3>
+          <p>OpenCode / Codex / Cursor / Trae SOLO CN 在本机登录即可。没登录的那一行会显示「未登录」。</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>看剩余、填到期日</h3>
+          <p>卡片会自动轮询。点「设置到期时间」填订阅日期，临近到期会变色。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="download" style="padding-top: 0;">
+    <div class="container">
+      <div class="download-section">
+        <h2>下载额度</h2>
+        <p>macOS 安装包。打开后拖进 Applications 即可使用。</p>
+        <div class="download-buttons">
+          <a href="/downloads/额度.dmg" class="btn btn-primary" data-dl="mac">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            macOS 版下载
+          </a>
+        </div>
+        <p class="download-note">需要 macOS 14+ · ad-hoc 签名，第一次若拦截请右键打开 · 下载无需 GitHub 登录</p>
+      </div>
+    </div>
+  </section>
 
   <footer>
-    <p>额度是本机工具，下载无需 GitHub 登录。</p>
+    <div class="container">
+      <p>额度 · macOS 用量置顶卡片</p>
+      <p>只读本机登录态，数据留在你的设备上</p>
+    </div>
   </footer>
-  <script src="/app.js"></script>
+
+  <script>
+    (function () {
+      var FALLBACK = "/downloads/\u989d\u5ea6.dmg";
+
+      function applyDownloads(url) {
+        document.querySelectorAll("[data-dl=mac]").forEach(function (el) {
+          el.href = url || FALLBACK;
+        });
+      }
+
+      fetch("/latest.json")
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          applyDownloads(data.download || FALLBACK);
+          var badge = document.getElementById("version-badge");
+          if (badge && data.version && data.build && data.build !== "pending") {
+            badge.textContent = "v" + data.version + " · " + data.build;
+          } else if (badge && data.version) {
+            badge.textContent = "v" + data.version;
+          }
+        })
+        .catch(function () {
+          applyDownloads(FALLBACK);
+          var badge = document.getElementById("version-badge");
+          if (badge) badge.textContent = "最新版";
+        });
+    })();
+  </script>
+
 </body>
 </html>
